@@ -14,11 +14,15 @@ const useStore = create(
       // Actions
       addObject: (type) => {
         const defaultDim = DEFAULT_DIMENSIONS[type] || {};
+        const existingCount = get().objects.length;
+        // Spread objects in a grid pattern to avoid stacking
+        const col = existingCount % 5;
+        const row = Math.floor(existingCount / 5);
         const newObj = {
           id: uuidv4(),
           type,
-          name: `${type} ${get().objects.length + 1}`,
-          position: [0, 0, 0],
+          name: `${type} ${existingCount + 1}`,
+          position: [col * 2, 0, row * 2],
           rotation: [0, 0, 0],
           width: defaultDim.width || 1,
           height: defaultDim.height || 1,

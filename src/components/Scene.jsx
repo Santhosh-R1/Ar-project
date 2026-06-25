@@ -6,6 +6,7 @@ import { xrStore } from '../store/xrStore';
 import useStore from '../hooks/useStore';
 import { ConstructionObject } from './Objects';
 import ARReticle from './ARReticle';
+import AROverlay from './AROverlay';
 
 const SceneContent = () => {
   const { objects, theme } = useStore();
@@ -44,6 +45,9 @@ const SceneContent = () => {
 
       {!isAR && <OrbitControls makeDefault />}
       {!isAR && <Environment preset="city" />}
+
+      {/* DOM overlay — rendered on top of camera feed in AR mode */}
+      {isAR && <AROverlay />}
     </>
   );
 };
