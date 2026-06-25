@@ -1,17 +1,17 @@
-import React, { useRef, useState } from 'react';
-import { useXRHitTest, useXR } from '@react-three/xr';
-import { Matrix4, Vector3 } from 'three';
+import React, { useRef } from 'react';
+import { useXRHitTest } from '@react-three/xr';
+import useStore from '../hooks/useStore';
+import { Matrix4, Vector3, DoubleSide } from 'three';
 
 const matrixHelper = new Matrix4();
 
 const ARReticle = ({ children }) => {
   const reticleRef = useRef();
-  const [placedPosition, setPlacedPosition] = useState(null);
-  const isAR = useXR(state => state.mode === 'immersive-ar');
+  const { isAR, placedPosition, setPlacedPosition, activeTool, addObject } = useStore();
 
   useXRHitTest(
     (results, getWorldMatrix) => {
-      if (!isAR || placedPosition) return;
+      if (!isAR) return;
 
       if (results.length > 0 && reticleRef.current) {
         getWorldMatrix(matrixHelper, results[0]);
@@ -26,22 +26,34 @@ const ARReticle = ({ children }) => {
   );
 
   const placeScene = () => {
-    if (isAR && reticleRef.current && reticleRef.current.visible && !placedPosition) {
-      setPlacedPosition(reticleRef.current.position.clone());
+    if (!isAR || !reticleRef.current || !reticleRef.current.visible) return;
+
+    if (!placedPosition) {
+      const anchorPos = reticleRef.current.position.clone();
+      setPlacedPosition(anchorPos);
+
+      if (activeTool) {
+        addObject(activeTool, [0, 0, 0]);
+      }
+      return;
+    }
+
+    if (activeTool) {
+      const localPos = reticleRef.current.position.clone().sub(placedPosition);
+      addObject(activeTool, [localPos.x, localPos.y, localPos.z]);
     }
   };
 
   if (!isAR) {
-    // Not in AR, render children normally
     return <group>{children}</group>;
   }
 
   return (
     <group onPointerDown={placeScene}>
-      {!placedPosition && (
+      {isAR && (
         <mesh ref={reticleRef} rotation={[-Math.PI / 2, 0, 0]} visible={false}>
-          <ringGeometry args={[0.1, 0.2, 32]} />
-          <meshBasicMaterial color="#00ff00" transparent opacity={0.8} />
+          <ringGeometry args={[0.1, 0.15, 32]} />
+          <meshBasicMaterial color="#00ff00" transparent opacity={0.6} side={DoubleSide} />
         </mesh>
       )}
       

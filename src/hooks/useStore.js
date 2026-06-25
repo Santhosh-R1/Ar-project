@@ -8,11 +8,16 @@ const useStore = create(
     (set, get) => ({
       objects: [],
       selectedId: null,
+      activeTool: null,
+      placedPosition: null,
       unit: 'Feet',
       theme: 'Dark',
 
       // Actions
-      addObject: (type) => {
+      setPlacedPosition: (pos) => set({ placedPosition: pos }),
+      setActiveTool: (tool) => set({ activeTool: tool, selectedId: null }),
+
+      addObject: (type, customPosition) => {
         const defaultDim = DEFAULT_DIMENSIONS[type] || {};
         const existingCount = get().objects.length;
         // Spread objects in a grid pattern to avoid stacking
@@ -22,7 +27,7 @@ const useStore = create(
           id: uuidv4(),
           type,
           name: `${type} ${existingCount + 1}`,
-          position: [col * 2, 0, row * 2],
+          position: customPosition || [col * 2, 0, row * 2],
           rotation: [0, 0, 0],
           width: defaultDim.width || 1,
           height: defaultDim.height || 1,
@@ -60,7 +65,7 @@ const useStore = create(
       },
 
       selectObject: (id) => {
-        set({ selectedId: id });
+        set({ selectedId: id, activeTool: null });
       },
 
       setUnit: (unit) => set({ unit }),

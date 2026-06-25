@@ -16,7 +16,7 @@ const icons = {
 };
 
 const AROverlay = () => {
-  const { objects, selectedId, selectObject, addObject, updateObject, deleteObject, duplicateObject } = useStore();
+  const { objects, selectedId, activeTool, setActiveTool, selectObject, updateObject, deleteObject, duplicateObject } = useStore();
   const [showSidebar, setShowSidebar] = useState(true);
   const [showProps, setShowProps] = useState(true);
   const [activeTab, setActiveTab] = useState('dims'); // 'dims' | 'transform' | 'color'
@@ -72,22 +72,23 @@ const AROverlay = () => {
             {/* Header */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', borderBottom: '1px solid rgba(255,255,255,0.15)' }}>
               <span style={{ fontWeight: 700, fontSize: 13 }}>Objects</span>
-              <span style={{ fontSize: 11, opacity: 0.6 }}>Tap to add</span>
+              <span style={{ fontSize: 11, opacity: 0.6 }}>Select & tap surface</span>
             </div>
             {/* Grid */}
             <div style={{ padding: 10, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, overflowY: 'auto', maxHeight: 'calc(80vh - 44px)' }}>
               {Object.values(OBJECT_TYPES).map((type) => (
                 <button
                   key={type}
-                  onClick={() => addObject(type)}
+                  onClick={() => setActiveTool(activeTool === type ? null : type)}
                   style={{
                     display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
                     padding: '10px 6px', borderRadius: 12,
-                    background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)',
+                    background: activeTool === type ? 'rgba(99,102,241,0.6)' : 'rgba(255,255,255,0.08)', 
+                    border: activeTool === type ? '1px solid rgba(165,180,252,0.8)' : '1px solid rgba(255,255,255,0.15)',
                     color: 'white', cursor: 'pointer', gap: 6, transition: 'background 0.15s',
                   }}
-                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(99,102,241,0.35)'}
-                  onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'}
+                  onMouseEnter={e => { if (activeTool !== type) e.currentTarget.style.background = 'rgba(99,102,241,0.35)'; }}
+                  onMouseLeave={e => { if (activeTool !== type) e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; }}
                 >
                   <span style={{ color: '#818cf8' }}>{icons[type]}</span>
                   <span style={{ fontSize: 10, fontWeight: 600, textAlign: 'center', lineHeight: 1.2 }}>{type}</span>
