@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import useStore from '../hooks/useStore';
 import { OBJECT_TYPES } from '../data/constants';
 import { PivotControls } from '@react-three/drei';
+import { useXR } from '@react-three/xr';
 
 export const ConstructionObject = ({ objectData }) => {
   const { id, type, position, rotation, width, height, depth, radius, color } = objectData;
@@ -10,6 +11,7 @@ export const ConstructionObject = ({ objectData }) => {
   const selectObject = useStore.getState().selectObject;
   const selectedId = useStore((state) => state.selectedId);
   const isSelected = selectedId === id;
+  const isAR = useXR(state => state.mode === 'immersive-ar' || state.mode === 'immersive-vr');
 
   const handleDrag = (matrix) => {
     // Extract position from matrix
@@ -61,7 +63,7 @@ export const ConstructionObject = ({ objectData }) => {
 
   return (
     <group position={position} rotation={rotation}>
-      {isSelected ? (
+      {isSelected && !isAR ? (
         <PivotControls
           visible={true}
           scale={1.5}
