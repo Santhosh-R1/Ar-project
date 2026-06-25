@@ -5,13 +5,16 @@ import { formatDimension } from '../utils/helpers';
 import { MATERIALS } from '../data/constants';
 
 const PropertiesPanel = () => {
-  const { theme, objects, selectedId, updateObject, duplicateObject, deleteObject, unit } = useStore();
+  const { theme, objects, selectedId, updateObject, duplicateObject, deleteObject, unit, mobilePropsOpen } = useStore();
 
   const selectedObj = objects.find(o => o.id === selectedId);
 
   if (!selectedObj) {
     return (
-      <div className={`w-72 flex flex-col items-center justify-center border-l h-full p-6 text-center ${theme === 'Dark' ? 'bg-dark-bg border-dark-border text-dark-muted' : 'bg-light-bg border-light-border text-light-muted'}`}>
+      <div className={`w-72 flex flex-col items-center justify-center border-l h-full p-6 text-center shrink-0
+        absolute right-0 md:relative z-20 transition-transform duration-300
+        ${mobilePropsOpen ? 'translate-x-0' : 'translate-x-full md:translate-x-0'}
+        ${theme === 'Dark' ? 'bg-dark-bg border-dark-border text-dark-muted' : 'bg-light-bg border-light-border text-light-muted'}`}>
         <p>Select an object to view its properties.</p>
       </div>
     );
@@ -46,7 +49,10 @@ const PropertiesPanel = () => {
   }`;
 
   return (
-    <div className={`w-72 flex flex-col border-l h-full overflow-y-auto scrollbar-thin ${theme === 'Dark' ? 'bg-dark-bg border-dark-border text-dark-text' : 'bg-light-bg border-light-border text-light-text'}`}>
+    <div className={`w-72 flex flex-col border-l h-full overflow-y-auto scrollbar-thin shrink-0
+      absolute right-0 md:relative z-20 transition-transform duration-300
+      ${mobilePropsOpen ? 'translate-x-0' : 'translate-x-full md:translate-x-0'}
+      ${theme === 'Dark' ? 'bg-dark-bg border-dark-border text-dark-text' : 'bg-light-bg border-light-border text-light-text'}`}>
       <div className="p-4 border-b border-inherit flex justify-between items-center sticky top-0 backdrop-blur-md z-10">
         <h2 className="font-semibold text-lg truncate pr-2">{selectedObj.name}</h2>
         <span className="text-xs px-2 py-1 bg-blue-500/20 text-blue-500 rounded-full">{selectedObj.type}</span>

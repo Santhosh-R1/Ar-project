@@ -13,23 +13,64 @@ export const ConstructionObject = ({ objectData }) => {
   const isSelected = selectedId === id;
   const isAR = useXR(state => state.mode === 'immersive-ar' || state.mode === 'immersive-vr');
 
-  const handleDrag = (matrix) => {
-    // Extract position from matrix
-    const pos = new THREE.Vector3();
-    const rot = new THREE.Quaternion();
-    const scale = new THREE.Vector3();
-    matrix.decompose(pos, rot, scale);
-    
-    // Euler from Quaternion
-    const euler = new THREE.Euler().setFromQuaternion(rot);
+  const groupRef = useRef();
+  const isDragging = useRef(false);
+  const dragOffset = useRef(new THREE.Vector3());
+  const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0); // XZ plane at y=0 local
 
-    updateObject(id, {
-      position: [pos.x, pos.y, pos.z],
-      rotation: [euler.x, euler.y, euler.z]
-    });
+  const handlePointerDown = (e) => {
+    e.stopPropagation();
+    selectObject(id);
+    if (isAR) {
+      isDragging.current = true;
+      e.target.setPointerCapture(e.pointerId);
+      
+      const parentGroup = groupRef.current?.parent;
+      if (parentGroup) {
+        const localPoint = parentGroup.worldToLocal(e.point.clone());
+        dragOffset.current.copy(localPoint).sub(new THREE.Vector3(...position));
+      }
+    }
+  };
+
+  const handlePointerMove = (e) => {
+    if (isDragging.current && isAR) {
+      e.stopPropagation();
+      const parentGroup = groupRef.current?.parent;
+      if (parentGroup) {
+        const ray = e.ray.clone();
+        const inverseMatrix = new THREE.Matrix4().copy(parentGroup.matrixWorld).invert();
+        ray.applyMatrix4(inverseMatrix);
+        
+        const intersect = new THREE.Vector3();
+        ray.intersectPlane(plane, intersect);
+        
+        if (intersect) {
+          const newPos = intersect.sub(dragOffset.current);
+          updateObject(id, { position: [newPos.x, position[1], newPos.z] });
+        }
+      }
+    }
+  };
+
+  const handlePointerUp = (e) => {
+    if (isDragging.current && isAR) {
+      e.stopPropagation();
+      isDragging.current = false;
+      e.target.releasePointerCapture(e.pointerId);
+    }
   };
 
   const renderMesh = () => {
+    const commonProps = {
+      castShadow: true,
+      receiveShadow: true,
+      onPointerDown: handlePointerDown,
+      onPointerMove: handlePointerMove,
+      onPointerUp: handlePointerUp,
+      onPointerOut: handlePointerUp,
+    };
+
     switch (type) {
       case OBJECT_TYPES.WALL:
       case OBJECT_TYPES.DOOR:
@@ -39,21 +80,21 @@ export const ConstructionObject = ({ objectData }) => {
       case OBJECT_TYPES.FURNITURE:
       case OBJECT_TYPES.STAIRCASE:
         return (
-          <mesh castShadow receiveShadow onClick={(e) => { e.stopPropagation(); selectObject(id); }}>
+          <mesh {...commonProps}>
             <boxGeometry args={[width, height, depth]} />
             <meshStandardMaterial color={color} roughness={0.7} metalness={0.1} />
           </mesh>
         );
       case OBJECT_TYPES.PILLAR:
         return (
-          <mesh castShadow receiveShadow onClick={(e) => { e.stopPropagation(); selectObject(id); }}>
+          <mesh {...commonProps}>
             <cylinderGeometry args={[radius, radius, height, 32]} />
             <meshStandardMaterial color={color} roughness={0.7} metalness={0.1} />
           </mesh>
         );
       default:
         return (
-          <mesh castShadow receiveShadow onClick={(e) => { e.stopPropagation(); selectObject(id); }}>
+          <mesh {...commonProps}>
             <boxGeometry args={[width, height, depth]} />
             <meshStandardMaterial color={color} roughness={0.7} metalness={0.1} />
           </mesh>
@@ -62,7 +103,7 @@ export const ConstructionObject = ({ objectData }) => {
   };
 
   return (
-    <group position={position} rotation={rotation}>
+    <group ref={groupRef} position={position} rotation={rotation}>
       {isSelected && !isAR ? (
         <PivotControls
           visible={true}

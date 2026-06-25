@@ -12,8 +12,12 @@ const useStore = create(
       placedPosition: null,
       unit: 'Feet',
       theme: 'Dark',
+      mobileMenuOpen: false,
+      mobilePropsOpen: false,
 
       // Actions
+      setMobileMenuOpen: (val) => set({ mobileMenuOpen: val }),
+      setMobilePropsOpen: (val) => set({ mobilePropsOpen: val }),
       setPlacedPosition: (pos) => set({ placedPosition: pos }),
       setActiveTool: (tool) => set({ activeTool: tool, selectedId: null }),
 

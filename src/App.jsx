@@ -37,7 +37,7 @@ function App() {
   return (
     <div className={`h-screen w-screen flex flex-col overflow-hidden font-sans ${theme === 'Dark' ? 'dark bg-dark-bg text-dark-text' : 'bg-light-bg text-light-text'}`}>
       <Toolbar />
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex overflow-hidden relative">
         <Sidebar />
         <Scene />
         <PropertiesPanel />

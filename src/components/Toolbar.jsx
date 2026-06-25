@@ -1,11 +1,11 @@
 import React from 'react';
-import { Save, FolderOpen, Download, Upload, Trash2, Moon, Sun, Ruler, Box } from 'lucide-react';
+import { Save, FolderOpen, Download, Upload, Trash2, Moon, Sun, Ruler, Box, Menu, Sliders } from 'lucide-react';
 import useStore from '../hooks/useStore';
 import { exportProjectJSON } from '../utils/helpers';
 import { xrStore } from '../store/xrStore';
 
 const Toolbar = () => {
-  const { theme, toggleTheme, unit, setUnit, clearProject, objects, loadProject } = useStore();
+  const { theme, toggleTheme, unit, setUnit, clearProject, objects, loadProject, mobileMenuOpen, setMobileMenuOpen, mobilePropsOpen, setMobilePropsOpen } = useStore();
 
   const handleExport = () => {
     exportProjectJSON({ objects, unit, theme });
@@ -28,9 +28,15 @@ const Toolbar = () => {
   };
 
   return (
-    <div className={`h-14 flex items-center justify-between px-4 border-b ${theme === 'Dark' ? 'bg-dark-panel border-dark-border text-dark-text' : 'bg-light-panel border-light-border text-light-text'}`}>
-      <div className="flex items-center gap-2">
-        <h1 className="font-bold text-lg tracking-tight mr-4">Builder Pro</h1>
+    <div className={`h-14 flex items-center justify-between px-2 sm:px-4 border-b shrink-0 ${theme === 'Dark' ? 'bg-dark-panel border-dark-border text-dark-text' : 'bg-light-panel border-light-border text-light-text'}`}>
+      <div className="flex items-center gap-1 sm:gap-2">
+        <button 
+          className="md:hidden p-2 hover:bg-slate-700 rounded transition-colors"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+        >
+          <Menu size={18} />
+        </button>
+        <h1 className="font-bold text-base sm:text-lg tracking-tight mr-2 sm:mr-4 hidden sm:block">Builder Pro</h1>
         
         {/* We can use native Save/Load or just Import/Export for now since we persist to localstorage anyway */}
         <button className="p-2 hover:bg-slate-700 rounded transition-colors" title="Export Project" onClick={handleExport}>
@@ -49,25 +55,32 @@ const Toolbar = () => {
         </button>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-1 sm:gap-4">
         <button 
-          className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm transition-colors"
+          className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs sm:text-sm transition-colors"
           onClick={() => setUnit(unit === 'Feet' ? 'Meters' : 'Feet')}
         >
-          <Ruler size={16} />
+          <Ruler size={16} className="hidden sm:block" />
           {unit}
         </button>
 
         <button 
-          className="flex items-center gap-2 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-sm transition-colors"
+          className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-xs sm:text-sm transition-colors"
           onClick={() => xrStore.enterAR()}
         >
-          <Box size={16} />
-          AR Mode
+          <Box size={16} className="hidden sm:block" />
+          AR
         </button>
         
         <button className="p-2 hover:bg-slate-700 rounded transition-colors" onClick={toggleTheme}>
           {theme === 'Dark' ? <Sun size={18} /> : <Moon size={18} />}
+        </button>
+
+        <button 
+          className="md:hidden p-2 hover:bg-slate-700 rounded transition-colors"
+          onClick={() => setMobilePropsOpen(!mobilePropsOpen)}
+        >
+          <Sliders size={18} />
         </button>
       </div>
     </div>

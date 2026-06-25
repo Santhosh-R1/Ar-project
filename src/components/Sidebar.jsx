@@ -15,10 +15,13 @@ const icons = {
 };
 
 const Sidebar = () => {
-  const { theme, addObject } = useStore();
+  const { theme, addObject, mobileMenuOpen } = useStore();
 
   return (
-    <div className={`w-64 flex flex-col border-r h-full overflow-y-auto scrollbar-thin ${theme === 'Dark' ? 'bg-dark-bg border-dark-border text-dark-text' : 'bg-light-bg border-light-border text-light-text'}`}>
+    <div className={`w-64 flex flex-col border-r h-full overflow-y-auto scrollbar-thin shrink-0
+      absolute md:relative z-20 transition-transform duration-300
+      ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+      ${theme === 'Dark' ? 'bg-dark-bg border-dark-border text-dark-text' : 'bg-light-bg border-light-border text-light-text'}`}>
       <div className="p-4 border-b border-inherit">
         <h2 className="font-semibold text-lg">Object Library</h2>
         <p className="text-sm opacity-70 mt-1">Click to add to scene</p>
